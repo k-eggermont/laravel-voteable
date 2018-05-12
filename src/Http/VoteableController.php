@@ -38,7 +38,7 @@ class VoteableController extends Controller {
      */
 
     public function post($type,$id, Request $request) {
-        if(!\Auth::user()) {
+        if(!\Auth::check()) {
             return response()->setStatusCode(401, 'You are not connected!');
         }
 
@@ -66,7 +66,7 @@ class VoteableController extends Controller {
      * Suppression d'un vote
      */
     public function delete($id) {
-        if(!\Auth::user()) {
+        if(!\Auth::check()) {
             return response()->setStatusCode(401, 'You are not connected!');
         }
 
