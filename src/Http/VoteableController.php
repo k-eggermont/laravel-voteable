@@ -26,9 +26,9 @@ class VoteableController extends Controller {
             $order = "ASC";
         }
 
-        $comments = (config('laravel-voteable.model'))::where("voteable_type",$className)->where("voteable_id",$id)->orderBy("created_at",$order)->with(["childrens","author"])->paginate(config('laravel-voteable.paginate'));
+        $votes = (config('laravel-voteable.model'))::where("voteable_type",$className)->where("voteable_id",$id)->orderBy("updated_at",$order)->with(["childrens","author"])->paginate(config('laravel-voteable.paginate'));
 
-        return array("success" => true, "comments" => $comments);
+        return array("success" => true, "votes" => $votes);
 
     }
 
@@ -42,7 +42,7 @@ class VoteableController extends Controller {
             return response()->setStatusCode(401, 'You are not connected!');
         }
 
-        $this->validate($request, ["title" => "string|required", "body" => "string|required"]);
+        $this->validate($request, ["rate" => "integer|min:0|max:100|required"]);
 
         if(!isset(config('laravel-voteable.allowType')[$type])) {
             throw new \Exception($type." was not in the allowType configuration (laravel-voteable.php)");
@@ -52,10 +52,10 @@ class VoteableController extends Controller {
         // Verification de l'existance de l'objet concerné
         $obj = $className::where("id",$id)->firstOrFail();
 
-        $comment = $obj->createVote(["title" => request("title"),"body" => request("body")], \Auth::user());
+        $vote = $obj->createOrUpdateVote(request("rate"), \Auth::user());
 
-        if($comment) {
-            return array("success" => true, "comment" => $comment);
+        if($vote) {
+            return array("success" => true, "vote" => $vote);
         } else {
             throw new \Exception("An error occured");
         }
@@ -71,10 +71,10 @@ class VoteableController extends Controller {
         }
 
         // Verification de l'existance de l'objet concerné
-        $comment = (config('laravel-voteable.model'))::where("id",$id)->with("author")->firstOrFail();
+        $vote = (config('laravel-voteable.model'))::where("id",$id)->with("author")->firstOrFail();
 
-        if(($comment->author->id == \Auth::user()->id) OR (isset(\Auth::user()->is_admin) && \Auth::user()->is_admin === true)) {
-            $comment->delete();
+        if(\Auth::check() && (($vote->author->id == \Auth::user()->id) OR (isset(\Auth::user()->is_admin) && \Auth::user()->is_admin === true))) {
+            $vote->delete();
         } else {
             return response()->setStatusCode(403, 'You are not authorized !');
         }

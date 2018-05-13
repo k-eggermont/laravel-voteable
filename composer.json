@@ -1,5 +1,5 @@
 {
-    "name": "keggermont/votable",
+    "name": "keggermont/voteable",
     "description": "Voteable trait for laravel 5.5",
     "authors": [
         {
@@ -30,7 +30,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Keggermont\\Voteable\\VotableServiceProvider"
+                "Keggermont\\Voteable\\VoteableServiceProvider"
             ]
         }
     },
